@@ -28,9 +28,9 @@ const Library = ({ bookData = [] }: any) => {
 
     return (
         <div className="p-6">
-            <h2 className="text-2xl font-semibold mb-4">My Library</h2>
+            <h2 className="text-2xl font-semibold mb-4">Library</h2>
             {library.length === 0 ? (
-                <p className="text-gray-500 text-md mt-2">Your library is empty.</p>
+                <p className="text-gray-500 text-md mt-2">Library is empty.</p>
             ) : (
                 <div className="flex flex-wrap -mx-2">
                     {library?.map((libraryBook: any, index: number) => {
