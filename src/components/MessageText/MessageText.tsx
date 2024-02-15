@@ -1,4 +1,3 @@
-// Message.jsx
 import React from 'react';
 
 type MessageType = {

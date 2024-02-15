@@ -1,30 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import BookItemCard from '../BookItemCard/BookItemCard';
+import { useLibraryContext } from '../../context-api/BaseContextApi';
+import { BookType } from '../../types/types';
 
-const Library = ({ bookData = [] }: any) => {
-    const [library, setLibrary] = useState(JSON.parse(localStorage.getItem('library') || '[]'));
+const Library = ({ bookData = [] }) => {
+    const { library } = useLibraryContext();
     const [topRatedBooks, setTopRatedBooks] = useState([]);
 
     useEffect(() => {
-        // Calculate progress for each book and sort by progress
         const sortedBooks = bookData
-            .map((book: any) => {
+            .map((book: BookType) => {
                 const progress = (book.currentPage / book.pageCount) * 100;
                 return { ...book, progress };
             })
-            .sort((a: any, b: any) => b.progress - a.progress);
-
-        // Select the top 5 books
-        const top5Books = sortedBooks.slice(0, 5);
+            .sort((a, b) => b.progress - a.progress);
+        const top5Books:any = sortedBooks.slice(0, 5);
 
         setTopRatedBooks(top5Books);
     }, [bookData]);
-
-    const removeFromLibrary = (bookSlug: string) => {
-        const updatedLibrary = library.filter((libraryBook: any) => libraryBook.book !== bookSlug);
-        setLibrary(updatedLibrary);
-        localStorage.setItem('library', JSON.stringify(updatedLibrary));
-    };
 
     return (
         <div className="p-6">
@@ -40,7 +33,6 @@ const Library = ({ bookData = [] }: any) => {
                                 key={index}
                                 book={matchingBook}
                                 index={index}
-                                removeFromLibrary={removeFromLibrary}
                             />
                         ) : null;
                     })}
@@ -51,12 +43,11 @@ const Library = ({ bookData = [] }: any) => {
                 <ul className="text-sm list-disc pl-4">
                     {topRatedBooks.map((book: any, index: number) => (
                         <li key={index} className="mb-1">
-                            {book.title} - {Math.round(book.progress)}% progress
+                            {book.title} - {Math.round(book?.progress)}% progress
                         </li>
                     ))}
                 </ul>
             </div>
-
         </div>
     );
 };

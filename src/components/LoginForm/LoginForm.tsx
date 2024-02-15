@@ -58,7 +58,7 @@ const LoginForm = () => {
                 <button
                     type="button"
                     onClick={handleLogin}
-                    className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
+                    className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:border-green-300"
                 >
                     Login
                 </button>

@@ -1,4 +1,3 @@
-// RegistrationForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MessageText from '../MessageText/MessageText';

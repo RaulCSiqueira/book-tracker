@@ -1,29 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { addToLibrary } from '../../utils/functions';
+import { BookType, Review } from '../../types/types';
+import { useLibraryContext } from '../../context-api/BaseContextApi'; // Update the path
 import { getCookie } from '../../utils/cookies';
-
-type Book = {
-    title: string;
-    authors: string;
-    genre: string;
-    pageCount: number;
-    coverImage: string;
-    slug: string;
-    currentPage: number;
-    reviews: Review[];
-}
-
-type Review = {
-    author: string;
-    review: string;
-}
 
 const BookItem = () => {
     const userCookie = getCookie('user');
     const { book_id } = useParams();
-    const [book, setBook] = useState<Book | null>({
+    const { library, toggleLibrary } = useLibraryContext(); // Use the library context
+    const [book, setBook] = useState<BookType | null>({
         title: '',
         authors: '',
         genre: '',
@@ -37,36 +23,31 @@ const BookItem = () => {
     const [review, setReview] = useState('');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [pageProgress, setPageProgress] = useState<number>(0);
-    const [isInLibrary, setIsInLibrary] = useState(false);
 
     useEffect(() => {
         const fetchBookData = async () => {
             try {
-                const response = await axios.get<Book>(`http://localhost:4000/books/${book_id}`);
+                const response = await axios.get<BookType>(`http://localhost:4000/books/${book_id}`);
                 setBook(response.data);
-                setIsInLibrary(checkIsInLibrary(response.data?.slug));
             } catch (error: any) {
                 console.error('Error fetching book data:', error.message);
             }
         };
 
         fetchBookData();
-    }, []);
+    }, [book_id]);
 
     useEffect(() => {
         calculatePageProgress();
     }, [book?.currentPage, book?.pageCount]);
 
     const checkIsInLibrary = (slug: string | undefined) => {
-        const library = localStorage.getItem('library');
-        const libraryArray = library ? JSON.parse(library) : [];
-        return libraryArray.some((item: any) => item.book === slug);
+        return library.some((item: any) => item.book === slug);
     };
 
     const handleAddToLibrary = (event: any) => {
         event.preventDefault();
-        addToLibrary(book?.slug);
-        setIsInLibrary(!isInLibrary);
+        toggleLibrary(book?.slug);
     };
 
     const handleReviewSubmit = async () => {
@@ -152,7 +133,7 @@ const BookItem = () => {
                 <img src={book?.coverImage} className="h-50 w-40 object-contain mr-4" alt={book?.title} />
                 <div className='w-60'>
                     <div className='absolute top-2 right-2' onClick={handleAddToLibrary} style={{ cursor: 'pointer' }}>
-                        <span className='text-yellow-500' style={{ fontSize: '26px' }}>{isInLibrary ? '★' : '☆'}</span>
+                        <span className='text-yellow-500' style={{ fontSize: '26px' }}>{checkIsInLibrary(book?.slug) ? '★' : '☆'}</span>
                     </div>
                     <h2 className="text-xl font-semibold mb-2">{book?.title}</h2>
                     <p className="text-gray-600 mb-2">Author: {book?.authors}</p>

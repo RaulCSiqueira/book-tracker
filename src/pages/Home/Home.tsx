@@ -1,4 +1,3 @@
-import  { useState, useEffect } from 'react'
 import BookList from '../../components/BookList/BookList'
 
 const Home = ({ bookData }: any) => {
