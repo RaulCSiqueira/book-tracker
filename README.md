@@ -1,46 +1,91 @@
-# Getting Started with Create React App
+## React Book Tracker Project
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+This project is a Book Tracker application built with React on the client side and Node.js, Json-server, and Express on the server side. The application allows users to track their reading progress, manage a personal library, and interact with various book-related features.
 
-In the project directory, you can run:
+## Getting Started
 
-### `npm start`
+* Client Side
+Install Dependencies:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+bash
+npm install
+Start Development Server:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+bash
+npm run start
+Access the development environment at http://localhost:3000.
 
-### `npm test`
+Build Project:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+bash
+npm run build
+Create a production-ready build.
 
-### `npm run build`
+Server Side
+Install Dependencies:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+bash
+npm install
+Start Server:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+bash
+npm run start
+Start the server environment.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+bash
+npm run start-dev
+Start Server with Nodemon (Development):
+Access the development environment at http://localhost:4000.
 
-### `npm run eject`
+bash
+npm run start-dev
+Start the server with nodemon for automatic restarts during development.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Tech Stack
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+* Client Side
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+React
+Javascript
+Typescript
+Tailwind CSS
+HTML
+CSS
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+* Server Side
 
-## Learn More
+Node.js
+Json-server
+Express
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Project Structure
+The project is structured as follows:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+src: Contains the client-side source code.
+
+components: React components used in different pages.
+
+pages: Individual pages of the application (Home, Library, Book, Login, Register).
+
+services: Services for handling API requests, authentication, etc.
+
+server: Contains the server-side code.
+
+db.json: JSON file used as a simple database for the Json-server.
+
+server.js: Entry point for the Express server.
+
+
+## Project Workflow
+
+- Home Page: Landing page with project information and navigation options.
+- Library Page: Accessible only to logged-in users, allows tracking reading progress and managing the book library.
+- Book Page: Details of a specific book, accessible from the Library or search results.
+- Login: Page for user authentication.
+- Register: Page for creating a new user account.
+
+## Authentication
+- Only logged-in users can access the library and enjoy the full features of the application.
+- Users need to create an account to track progress and add favorite books to their library.
