@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { addToLibrary } from '../../utils/functions';
+import { getCookie } from '../../utils/cookies';
 
 type Book = {
     title: string;
@@ -11,10 +12,16 @@ type Book = {
     coverImage: string;
     slug: string;
     currentPage: number;
-    reviews: string[] | undefined;
+    reviews: Review[];
 }
 
-const BookItem: React.FC<{ bookData: Book[] }> = ({ bookData }) => {
+type Review = {
+    author: string;
+    review: string;
+}
+
+const BookItem = () => {
+    const userCookie = getCookie('user');
     const { book_id } = useParams();
     const [book, setBook] = useState<Book | null>({
         title: '',
@@ -30,12 +37,14 @@ const BookItem: React.FC<{ bookData: Book[] }> = ({ bookData }) => {
     const [review, setReview] = useState('');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [pageProgress, setPageProgress] = useState<number>(0);
+    const [isInLibrary, setIsInLibrary] = useState(false);
 
     useEffect(() => {
         const fetchBookData = async () => {
             try {
                 const response = await axios.get<Book>(`http://localhost:4000/books/${book_id}`);
                 setBook(response.data);
+                setIsInLibrary(checkIsInLibrary(response.data?.slug));
             } catch (error: any) {
                 console.error('Error fetching book data:', error.message);
             }
@@ -48,19 +57,39 @@ const BookItem: React.FC<{ bookData: Book[] }> = ({ bookData }) => {
         calculatePageProgress();
     }, [book?.currentPage, book?.pageCount]);
 
+    const checkIsInLibrary = (slug: string | undefined) => {
+        const library = localStorage.getItem('library');
+        const libraryArray = library ? JSON.parse(library) : [];
+        return libraryArray.some((item: any) => item.book === slug);
+    };
+
+    const handleAddToLibrary = (event: any) => {
+        event.preventDefault();
+        addToLibrary(book?.slug);
+        setIsInLibrary(!isInLibrary);
+    };
+
     const handleReviewSubmit = async () => {
         try {
             if (review.length > 1) {
                 setReview('');
                 setErrorMessage('');
+                let author = "Anonymous"
+                if (userCookie !== null) {
+                    author = JSON.parse(userCookie)
+                }
+                const newReview: Review = {
+                    author: author,
+                    review: review,
+                };
 
                 setBook((prevBook) => ({
                     ...prevBook!,
-                    reviews: [...(prevBook?.reviews || []), review],
+                    reviews: [...(prevBook?.reviews || []), newReview],
                 }));
 
                 await axios.post(`http://localhost:4000/books/${book?.slug}`, {
-                    reviews: [...(book?.reviews || []), review],
+                    reviews: [...(book?.reviews || []), newReview],
                 });
             } else {
                 setErrorMessage('Please enter a review with more than 1 character');
@@ -119,9 +148,12 @@ const BookItem: React.FC<{ bookData: Book[] }> = ({ bookData }) => {
 
     return (
         <div className='p-6'>
-            <div className="max-w-lg bg-white rounded-md overflow-hidden shadow-md p-4 flex">
+            <div className="max-w-lg bg-white rounded-md overflow-hidden shadow-md p-4 flex relative">
                 <img src={book?.coverImage} className="h-50 w-40 object-contain mr-4" alt={book?.title} />
                 <div className='w-60'>
+                    <div className='absolute top-2 right-2' onClick={handleAddToLibrary} style={{ cursor: 'pointer' }}>
+                        <span className='text-yellow-500' style={{ fontSize: '26px' }}>{isInLibrary ? '★' : '☆'}</span>
+                    </div>
                     <h2 className="text-xl font-semibold mb-2">{book?.title}</h2>
                     <p className="text-gray-600 mb-2">Author: {book?.authors}</p>
                     <p className="text-gray-600 mb-2">Genre: {book?.genre}</p>
@@ -170,15 +202,19 @@ const BookItem: React.FC<{ bookData: Book[] }> = ({ bookData }) => {
                 />
 
                 <button onClick={handleReviewSubmit} className="bg-light-blue-100 text-white px-4 py-2">Submit Review</button>
-                <button onClick={() => addToLibrary(book?.slug)} className="bg-green-500 text-white px-4 py-2 ml-2">Add to Library</button>
                 {errorMessage && (<p className="mt-2 text-xs text-red-500">{errorMessage}</p>)}
 
                 {book && book?.reviews && book?.reviews?.length > 0 && (
                     <div className="mt-8">
                         <h3 className="text-lg font-semibold mb-2">Reviews</h3>
-                        {book?.reviews?.map((r: any, index: number) => (
-                            <div key={index} className="border border-gray-300 p-2 mb-2 rounded-md">
-                                <p className="text-gray-600">{r}</p>
+                        {book?.reviews?.map((review: Review, index: number) => (
+                            <div key={index} className="mb-2">
+                                <p className="text-gray-600">
+                                    <span className="font-bold text-xs" style={{ textTransform: 'capitalize' }}>
+                                        @{review.author}:
+                                    </span>
+                                    <span className="ml-1">{review.review}</span>
+                                </p>
                             </div>
                         ))}
                     </div>
