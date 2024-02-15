@@ -1,6 +1,7 @@
 import BookItemCard from '../BookItemCard/BookItemCard';
+import React from 'react'
 
-interface BookTypes {
+type BookTypes = {
     title: string
     genre: string
     pageCount: string | number
@@ -13,9 +14,13 @@ const BookList = ({ bookData }: { bookData: BookTypes[] }) => {
         <div className="p-5 md:px-20 md:py-10">
             <h1 className='text-xxl mb-4'>Book Shelf</h1>
             <div className="flex flex-wrap -mx-2">
-                {bookData.map((book: BookTypes, index: number) => (
-                    <BookItemCard book={book} index={index} />
-                ))}
+                {bookData.map((book: BookTypes, index: number) => {
+                    return (
+                        <React.Fragment key={index}>
+                            <BookItemCard book={book} index={index} />
+                        </React.Fragment>
+                    )
+                })}
             </div>
         </div>
     );

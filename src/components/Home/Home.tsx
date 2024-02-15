@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react'
-import { bookData } from '../../assets/bookData'
+import  { useState, useEffect } from 'react'
 import BookList from '../../components/BookList/BookList'
 
-const Home = () => {
+const Home = ({ bookData }: any) => {
     return (
         <div>
             <BookList bookData={bookData} />
