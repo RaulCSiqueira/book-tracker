@@ -19,7 +19,10 @@ const LoginForm = () => {
             });
 
             if (response.data.success) {
-                setCookie('user', JSON.stringify(response.data.user.firstName), 1);
+                setCookie('user', JSON.stringify({
+                    username: response.data.user.firstName,
+                    id: response.data.user.id
+                }), 1);
                 setErrorMessage('')
                 setSuccessMessage('Successfully logged in')
                 setTimeout(() => {

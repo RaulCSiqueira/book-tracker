@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom';
 import { getCookie } from '../../utils/cookies';
 import { useNavigate } from 'react-router-dom';
 
+type UserCookieDataType = {
+    username: string,
+    id: number
+}
+
 const Header = () => {
     const userCookie = getCookie('user');
     const navigate = useNavigate();
@@ -11,6 +16,9 @@ const Header = () => {
         navigate('/');
         window.location.reload();
     };
+    const userData = userCookie ? JSON.parse(userCookie) : {};
+    const { username = '', id = null } = userData;
+
     return (
         <header className="bg-gray-800 text-white p-4 flex justify-between items-center">
             <div className="flex items-center">
@@ -22,7 +30,7 @@ const Header = () => {
             <div className="flex items-center">
                 {userCookie ? (
                     <>
-                        <span className="mr-4" style={{ textTransform: 'capitalize' }}>{JSON.parse(userCookie)}</span>
+                        <span className="mr-4" style={{ textTransform: 'capitalize' }}>{username}</span>
                         <button onClick={handleLogout} className="mr-4">Logout</button>
                     </>
                 ) : (

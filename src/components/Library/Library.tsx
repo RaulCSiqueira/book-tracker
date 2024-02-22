@@ -2,8 +2,23 @@ import React, { useState, useEffect } from 'react';
 import BookItemCard from '../BookItemCard/BookItemCard';
 import { useLibraryContext } from '../../context-api/BaseContextApi';
 import { BookType } from '../../types/types';
+import axios from 'axios'
 
-const Library = ({ bookData = [] }) => {
+const Library = () => {
+    const [bookData, setBookData] = useState<BookType[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get('http://localhost:4000/books');
+                setBookData(response.data);
+            } catch (error: any) {
+                console.error(`Error fetching data: ${error.message}`);
+            }
+        };
+
+        fetchData();
+    }, []);
     const { library } = useLibraryContext();
     const [topRatedBooks, setTopRatedBooks] = useState([]);
 
@@ -17,7 +32,7 @@ const Library = ({ bookData = [] }) => {
         const top5Books:any = sortedBooks.slice(0, 5);
 
         setTopRatedBooks(top5Books);
-    }, [bookData]);
+    }, []);
 
     return (
         <div className="p-6">

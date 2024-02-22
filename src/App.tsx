@@ -18,21 +18,6 @@ function PrivateRoute({ element }: any) {
 }
 
 function App() {
-    const [bookData, setBookData] = useState([]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get('http://localhost:4000/books');
-                setBookData(response.data);
-            } catch (error: any) {
-                console.error(`Error fetching data: ${error.message}`);
-            }
-        };
-
-        fetchData();
-    }, []);
-
     return (
         <>
             <BrowserRouter>
@@ -41,8 +26,8 @@ function App() {
                     <Header />
                     <div className='min-h-screen'>
                         <Routes>
-                            <Route path="/" element={<Home bookData={bookData} />} />
-                            <Route path="/library/*" element={<PrivateRoute element={<Library bookData={bookData} />} />} />
+                            <Route path="/" element={<Home />} />
+                            <Route path="/library/*" element={<PrivateRoute element={<Library />} />} />
                             <Route path="/books/:book_id" element={<BookItem />} />
                             <Route path="/login" element={<LoginForm />} />
                             <Route path="/register" element={<RegistrationForm />} />

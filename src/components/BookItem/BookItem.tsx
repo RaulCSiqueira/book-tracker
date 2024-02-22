@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import ProgressBar from '../ProgressBard/ProgressBar';
 import axios from 'axios';
 import { BookType, Review } from '../../types/types';
-import { useLibraryContext } from '../../context-api/BaseContextApi'; // Update the path
+import { useLibraryContext } from '../../context-api/BaseContextApi';
 import { getCookie } from '../../utils/cookies';
 
 const BookItem = () => {
     const userCookie = getCookie('user');
     const { book_id } = useParams();
-    const { library, toggleLibrary } = useLibraryContext(); // Use the library context
+    const { library, toggleLibrary } = useLibraryContext();
     const [book, setBook] = useState<BookType | null>({
         title: '',
         authors: '',
@@ -19,27 +20,39 @@ const BookItem = () => {
         currentPage: 1,
         reviews: [],
     });
-    const [tempCurrentPage, setTempCurrentPage] = useState<number | null>(null);
+    const cookieUserData = userCookie ? JSON.parse(userCookie) : {};
+    console.log(cookieUserData)
+    const { username = '', id = null } = cookieUserData;
+    const [currentPage, setCurrentPage] = useState<number | null>(null);
+    const [localCurrentPage, setLocalCurrentPage] = useState<number | null>(null);
     const [review, setReview] = useState('');
     const [errorMessage, setErrorMessage] = useState<string>('');
-    const [pageProgress, setPageProgress] = useState<number>(0);
+    const [userData, setUserData] = useState<any>({ bookProgress: [] });
 
     useEffect(() => {
-        const fetchBookData = async () => {
+        const fetchMultipleData = async () => {
             try {
-                const response = await axios.get<BookType>(`http://localhost:4000/books/${book_id}`);
-                setBook(response.data);
+                const [fetchBookData, fetchUserData] = await Promise.all([
+                    axios.get(`http://localhost:4000/books/${book_id}`),
+                    axios.get(`http://localhost:4000/user/${id}`)
+                ]);
+                setBook(fetchBookData.data);
+                setUserData(fetchUserData.data);
+    
+                const matchingBook = fetchUserData.data.bookProgress.find((book: any) => book.slug === book_id);
+    
+                setCurrentPage(matchingBook ? matchingBook.currentPage : 0);
             } catch (error: any) {
-                console.error('Error fetching book data:', error.message);
+                console.log(error.message);
             }
         };
-
-        fetchBookData();
-    }, [book_id]);
+    
+        fetchMultipleData();
+    }, [book_id, id]);
 
     useEffect(() => {
-        calculatePageProgress();
-    }, [book?.currentPage, book?.pageCount]);
+        setLocalCurrentPage(currentPage);
+    }, [currentPage]);
 
     const checkIsInLibrary = (slug: string | undefined) => {
         return library.some((item: any) => item.book === slug);
@@ -55,10 +68,7 @@ const BookItem = () => {
             if (review.length > 1) {
                 setReview('');
                 setErrorMessage('');
-                let author = "Anonymous"
-                if (userCookie !== null) {
-                    author = JSON.parse(userCookie)
-                }
+                const author = userCookie !== null ? username : 'Anonymous';
                 const newReview: Review = {
                     author: author,
                     review: review,
@@ -81,29 +91,20 @@ const BookItem = () => {
         }
     };
 
-    const calculatePageProgress = () => {
-        if (book && !isNaN(book?.currentPage) && !isNaN(book.pageCount as number)) {
-            const progress = (book?.currentPage / book.pageCount) * 100;
-            setPageProgress(Math.ceil(progress));
-        } else {
-            setPageProgress(0);
-        }
-    };
-
-    const removeLeadingZeros = (input: string) => {
-        return input.replace(/^0+/, '');
-    };
-
     const handleInputChange = (value: string) => {
-        const parsedValue = parseInt(removeLeadingZeros(value), 10) || 0;
-        const limitedValue = Math.min(parsedValue, book?.pageCount || 0);
-        setTempCurrentPage(limitedValue);
+        const parsedValue = parseInt(value, 10) || 0;
+        setLocalCurrentPage(parsedValue);
     };
 
     const handleEnterKeyPress = () => {
-        if (tempCurrentPage !== null) {
-            setCurrentPageWithLimit(tempCurrentPage);
-            calculatePageProgress();
+        if (localCurrentPage !== null) {
+            setCurrentPageWithLimit(localCurrentPage);
+        }
+    };
+
+    const handleInputBlur = () => {
+        if (localCurrentPage !== null && localCurrentPage !== currentPage) {
+            setCurrentPageWithLimit(localCurrentPage);
         }
     };
 
@@ -113,20 +114,34 @@ const BookItem = () => {
 
             setErrorMessage('');
 
-            await axios.post(`http://localhost:4000/books/${book?.slug}`, {
-                currentPage: limitedValue,
+            await axios.post(`http://localhost:4000/user/${id}`, {
+                bookProgress: [
+                    ...userData.bookProgress.filter((item: any) => item.slug !== book?.slug),
+                    { slug: book?.slug, currentPage: limitedValue }
+                ]
             });
-
-            setBook((prevBook) => ({
-                ...prevBook!,
-                currentPage: limitedValue,
+            
+            setUserData((prevUserData: any) => ({
+                ...prevUserData,
+                bookProgress: [
+                    ...prevUserData.bookProgress.filter((item: any) => item.slug !== book?.slug),
+                    { slug: book?.slug, currentPage: limitedValue }
+                ]
             }));
+            console.log('post executed')
+
+            // Update current page state after API call
+            setCurrentPage(limitedValue);
         } catch (error: any) {
             console.error('Error updating book:', error.message);
             setErrorMessage('Error updating book');
         }
     };
 
+
+    const prop1 = 2;
+    const prop2 = 200;
+    const currentPageProgress = localCurrentPage === null ? (userData?.bookProgress.find((item: any) => item.slug === book?.slug)?.currentPage || 0) : localCurrentPage;
     return (
         <div className='p-6'>
             <div className="max-w-lg bg-white rounded-md overflow-hidden shadow-md p-4 flex relative">
@@ -139,13 +154,8 @@ const BookItem = () => {
                     <p className="text-gray-600 mb-2">Author: {book?.authors}</p>
                     <p className="text-gray-600 mb-2">Genre: {book?.genre}</p>
                     <p className="text-gray-600 mb-2">Page Count: {book?.pageCount}</p>
-                    <p className="text-gray-600 mb-2">Current Page: {book?.currentPage}</p>
-                    <div className='flex items-center'>
-                        <span className='text-xs mr-2'>{pageProgress}%</span>
-                        <div className="flex-start flex h-1 w-20 overflow-hidden rounded-full bg-gray-200 font-sans text-xs font-medium">
-                            <div className="flex h-full items-center justify-center overflow-hidden break-all rounded-full bg-green-300 text-white" style={{ width: `${pageProgress}%` }} />
-                        </div>
-                    </div>
+                    <p className="text-gray-600 mb-2">Current Page: {currentPageProgress}</p>
+                    <ProgressBar pageCount={book?.pageCount} currentPage={currentPageProgress} />
                 </div>
             </div>
             <div className="mt-8 max-w-lg">
@@ -155,16 +165,9 @@ const BookItem = () => {
                         type="text"
                         placeholder="Page Progress"
                         aria-label="Page Progress Input"
-                        value={tempCurrentPage === null ? book?.currentPage : tempCurrentPage}
-                        onChange={(e) => {
-                            handleInputChange(e.target.value)
-                        }}
-                        onBlur={() => {
-                            if (tempCurrentPage !== null) {
-                                setCurrentPageWithLimit(tempCurrentPage);
-                                calculatePageProgress();
-                            }
-                        }}
+                        value={localCurrentPage === null ? currentPageProgress : localCurrentPage}
+                        onChange={(e) => handleInputChange(e.target.value)}
+                        onBlur={handleInputBlur}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 handleEnterKeyPress();

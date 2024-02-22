@@ -1,9 +1,9 @@
 import BookList from '../../components/BookList/BookList'
 
-const Home = ({ bookData }: any) => {
+const Home = () => {
     return (
         <div>
-            <BookList bookData={bookData} />
+            <BookList />
         </div>
     )
 }
