@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const ProgressBar = React.memo(({ pageCount, currentPage }: any) => {
-    console.log('rendered')
     const calculatePercentage = () => {
         if (pageCount && pageCount !== 0) {
             return Math.ceil((currentPage / pageCount) * 100);

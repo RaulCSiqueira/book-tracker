@@ -24,14 +24,14 @@ const BookItemCard = ({ book, index }: BookItemPropType) => {
 
     const userCookie = getCookie('user');
     const cookieUserData = userCookie ? JSON.parse(userCookie) : {};
-    console.log(cookieUserData)
     const { id = null } = cookieUserData;
 
     useEffect(() => {
+        if (!isLoggedIn) return
         const fetchUserData = async () => {
             try {
                 const response = await axios.get(`http://localhost:4000/user/${id}`);    
-                const matchingBook = response.data.bookProgress.find((bookItem: UserBookProgress) => book.slug === bookItem?.slug);
+                const matchingBook = response.data.bookProgress?.find((bookItem: UserBookProgress) => book.slug === bookItem?.slug);
     
                 setCurrentPage(matchingBook ? matchingBook.currentPage : 0);
             } catch (error: any) {
@@ -42,7 +42,7 @@ const BookItemCard = ({ book, index }: BookItemPropType) => {
         fetchUserData();
     }, []);
     useEffect(() => {
-        setIsInLibrary(library.some((item: any) => item.book === book?.slug));
+        setIsInLibrary(library?.some((item: any) => item.book === book?.slug));
     }, [book?.slug, library]);
 
     const truncateText = (text: string, maxLength: number) => {

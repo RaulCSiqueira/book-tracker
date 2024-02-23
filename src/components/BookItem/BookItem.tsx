@@ -21,7 +21,6 @@ const BookItem = () => {
         reviews: [],
     });
     const cookieUserData = userCookie ? JSON.parse(userCookie) : {};
-    console.log(cookieUserData)
     const { username = '', id = null } = cookieUserData;
     const [currentPage, setCurrentPage] = useState<number | null>(null);
     const [localCurrentPage, setLocalCurrentPage] = useState<number | null>(null);
@@ -39,7 +38,7 @@ const BookItem = () => {
                 setBook(fetchBookData.data);
                 setUserData(fetchUserData.data);
     
-                const matchingBook = fetchUserData.data.bookProgress.find((book: any) => book.slug === book_id);
+                const matchingBook = fetchUserData.data.bookProgress?.find((book: any) => book.slug === book_id);
     
                 setCurrentPage(matchingBook ? matchingBook.currentPage : 0);
             } catch (error: any) {
@@ -116,21 +115,20 @@ const BookItem = () => {
 
             setErrorMessage('');
 
+            const updatedBookProgress = Array.isArray(userData.bookProgress)
+            ? userData.bookProgress
+                  ?.filter((item: any) => item.slug !== book?.slug)
+                  ?.concat({ slug: book?.slug, currentPage: limitedValue })
+            : [{ slug: book?.slug, currentPage: limitedValue }];
+
             await axios.post(`http://localhost:4000/user/${id}`, {
-                bookProgress: [
-                    ...userData.bookProgress.filter((item: any) => item.slug !== book?.slug),
-                    { slug: book?.slug, currentPage: limitedValue }
-                ]
+                bookProgress: updatedBookProgress
             });
             
             setUserData((prevUserData: any) => ({
                 ...prevUserData,
-                bookProgress: [
-                    ...prevUserData.bookProgress.filter((item: any) => item.slug !== book?.slug),
-                    { slug: book?.slug, currentPage: limitedValue }
-                ]
+                bookProgress: updatedBookProgress
             }));
-            console.log('post executed')
 
             setCurrentPage(limitedValue);
         } catch (error: any) {
@@ -139,7 +137,7 @@ const BookItem = () => {
         }
     };
 
-    const currentPageProgress = localCurrentPage === null ? (userData?.bookProgress.find((item: any) => item.slug === book?.slug)?.currentPage || 0) : localCurrentPage;
+    const currentPageProgress = localCurrentPage === null ? (userData?.bookProgress?.find((item: any) => item.slug === book?.slug)?.currentPage || 0) : localCurrentPage;
     return (
         <div className='p-6'>
             <div className="max-w-lg bg-white rounded-md overflow-hidden shadow-md p-4 flex relative">

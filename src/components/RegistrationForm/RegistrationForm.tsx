@@ -33,7 +33,7 @@ const RegistrationForm = () => {
                     lastName,
                     email,
                     dob,
-                    password,
+                    password
                 }),
             });
 
