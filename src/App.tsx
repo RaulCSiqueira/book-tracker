@@ -1,8 +1,8 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import axios from 'axios';
+import React, { lazy, Suspense } from 'react';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { getCookie } from './utils/cookies';
+
 import BookItem from './components/BookItem/BookItem'
 import Footer from './components/Footer/Footer'
 import Header from './components/Header/Header'
@@ -12,7 +12,11 @@ import LoginForm from './components/LoginForm/LoginForm'
 const Home = lazy(() => import('./pages/Home/Home'));
 const Library = lazy(() => import('./components/Library/Library'));
 
-function PrivateRoute({ element }: any) {
+interface PrivateRouteProps {
+    element: React.ReactElement;
+}
+
+function PrivateRoute({ element }: PrivateRouteProps) {
     const isUserLoggedIn = getCookie('user');
     return isUserLoggedIn ? element : <Navigate to="/" replace />;
 }

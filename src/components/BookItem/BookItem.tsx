@@ -99,12 +99,14 @@ const BookItem = () => {
     const handleEnterKeyPress = () => {
         if (localCurrentPage !== null) {
             setCurrentPageWithLimit(localCurrentPage);
+            setCurrentPage(localCurrentPage)
         }
     };
 
     const handleInputBlur = () => {
         if (localCurrentPage !== null && localCurrentPage !== currentPage) {
             setCurrentPageWithLimit(localCurrentPage);
+            setCurrentPage(localCurrentPage)
         }
     };
 
@@ -130,7 +132,6 @@ const BookItem = () => {
             }));
             console.log('post executed')
 
-            // Update current page state after API call
             setCurrentPage(limitedValue);
         } catch (error: any) {
             console.error('Error updating book:', error.message);
@@ -138,9 +139,6 @@ const BookItem = () => {
         }
     };
 
-
-    const prop1 = 2;
-    const prop2 = 200;
     const currentPageProgress = localCurrentPage === null ? (userData?.bookProgress.find((item: any) => item.slug === book?.slug)?.currentPage || 0) : localCurrentPage;
     return (
         <div className='p-6'>
@@ -154,8 +152,8 @@ const BookItem = () => {
                     <p className="text-gray-600 mb-2">Author: {book?.authors}</p>
                     <p className="text-gray-600 mb-2">Genre: {book?.genre}</p>
                     <p className="text-gray-600 mb-2">Page Count: {book?.pageCount}</p>
-                    <p className="text-gray-600 mb-2">Current Page: {currentPageProgress}</p>
-                    <ProgressBar pageCount={book?.pageCount} currentPage={currentPageProgress} />
+                    <p className="text-gray-600 mb-2">Current Page: {currentPage}</p>
+                    <ProgressBar pageCount={book?.pageCount} currentPage={currentPage} />
                 </div>
             </div>
             <div className="mt-8 max-w-lg">

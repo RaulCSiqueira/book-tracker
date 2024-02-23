@@ -3,22 +3,47 @@ import { Link } from 'react-router-dom';
 import { getCookie } from '../../utils/cookies';
 import { useLibraryContext } from '../../context-api/BaseContextApi';
 import { BookType } from '../../types/types';
+import axios from 'axios'
+import ProgressBar from '../ProgressBard/ProgressBar';
 
 type BookItemPropType = {
     book: BookType
     index: number
 }
 
+type UserBookProgress = {
+    slug: string;
+    currentPage: number;
+}
+
 const BookItemCard = ({ book, index }: BookItemPropType) => {
     const { library, toggleLibrary } = useLibraryContext();
     const [isLoggedIn, setIsLoggedIn] = useState(!!getCookie('user'));
     const [isInLibrary, setIsInLibrary] = useState(false);
+    const [currentPage, setCurrentPage] = useState<number | null>(null);
 
+    const userCookie = getCookie('user');
+    const cookieUserData = userCookie ? JSON.parse(userCookie) : {};
+    console.log(cookieUserData)
+    const { id = null } = cookieUserData;
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:4000/user/${id}`);    
+                const matchingBook = response.data.bookProgress.find((bookItem: UserBookProgress) => book.slug === bookItem?.slug);
+    
+                setCurrentPage(matchingBook ? matchingBook.currentPage : 0);
+            } catch (error: any) {
+                console.log(error.message);
+            }
+        };
+    
+        fetchUserData();
+    }, []);
     useEffect(() => {
         setIsInLibrary(library.some((item: any) => item.book === book?.slug));
     }, [book?.slug, library]);
-
-    const progress = Math.ceil((book?.currentPage / book?.pageCount) * 100);
 
     const truncateText = (text: string, maxLength: number) => {
         return text.length <= maxLength ? text : text.slice(0, maxLength) + '...';
@@ -45,10 +70,7 @@ const BookItemCard = ({ book, index }: BookItemPropType) => {
 
         return (
             <div className='flex items-center px-3'>
-                <span className='text-xs mr-2'>{progress}%</span>
-                <div className="flex-start flex h-1 w-12 overflow-hidden rounded-full bg-gray-200 font-sans text-xs font-medium">
-                    <div className="flex h-full items-center justify-center overflow-hidden break-all rounded-full bg-green-300 text-white" style={{ width: `${progress}%` }} />
-                </div>
+                <ProgressBar pageCount={book?.pageCount} currentPage={currentPage} />
             </div>
         );
     };
