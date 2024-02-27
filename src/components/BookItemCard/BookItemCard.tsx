@@ -46,7 +46,7 @@ const BookItemCard = ({ book, index }: BookItemPropType) => {
     }, [book?.slug, library]);
 
     const truncateText = (text: string, maxLength: number) => {
-        return text.length <= maxLength ? text : text.slice(0, maxLength) + '...';
+        return text?.length <= maxLength ? text : text?.slice(0, maxLength) + '...';
     };
 
     const handleLibraryToggle = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

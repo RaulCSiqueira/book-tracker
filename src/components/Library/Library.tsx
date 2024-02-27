@@ -34,12 +34,12 @@ const Library = () => {
                     axios.get(`http://localhost:4000/user/${id}`)
                 ]);
                 setBookData(fetchBookData.data);
-                
-                const sortedBooks = fetchUserData?.data?.bookProgress?.map((userBook:UserDataType) => {
-                    const matchingBook = fetchBookData?.data?.find((book:BookType) => book.slug === userBook.slug)
+
+                const sortedBooks = fetchUserData?.data?.bookProgress?.map((userBook: UserDataType) => {
+                    const matchingBook = fetchBookData?.data?.find((book: BookType) => book.slug === userBook.slug)
                     if (matchingBook) {
                         const progress = (userBook.currentPage / matchingBook.pageCount) * 100;
-                        return { ...{ title: matchingBook.title, slug: matchingBook.slug}, progress: Math.round(progress) };
+                        return { ...{ title: matchingBook.title, slug: matchingBook.slug }, progress: Math.round(progress) };
                     }
                     return null
                 }).sort((a: TopBookType, b: TopBookType) => b.progress - a.progress)
@@ -55,7 +55,7 @@ const Library = () => {
     return (
         <div className="p-6">
             <h2 className="text-2xl font-semibold mb-4">Library</h2>
-            {library.length === 0 ? (
+            {library?.length === 0 ? (
                 <p className="text-gray-500 text-md mt-2">Library is empty.</p>
             ) : (
                 <div className="flex flex-wrap -mx-2">
@@ -71,16 +71,19 @@ const Library = () => {
                     })}
                 </div>
             )}
-            <div className='mt-4'>
-                <h3 className="text-xl font-semibold mb-2">{`Top ${topRatedBooks.length} Most Progressed Books Information`}</h3>
-                <ul className="text-sm list-disc pl-4">
-                    {topRatedBooks?.map((book: any, index: number) => (
-                        <li key={index} className="mb-1">
-                            {book.title} - {book.progress}% progress
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            {topRatedBooks?.length > 0 ? (
+                <div className='mt-4'>
+                    <h3 className="text-xl font-semibold mb-2">{`Top ${topRatedBooks?.length} Most Progressed Books Information`}</h3>
+                    <ul className="text-sm list-disc pl-4">
+                        {topRatedBooks?.map((book: any, index: number) => (
+                            <li key={index} className="mb-1">
+                                {book.title} - {book.progress}% progress
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ) : null}
+
         </div>
     );
 };

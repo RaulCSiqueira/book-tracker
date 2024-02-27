@@ -64,7 +64,7 @@ const BookItem = () => {
 
     const handleReviewSubmit = async () => {
         try {
-            if (review.length > 1) {
+            if (review?.length > 1) {
                 setReview('');
                 setErrorMessage('');
                 const author = userCookie !== null ? username : 'Anonymous';
