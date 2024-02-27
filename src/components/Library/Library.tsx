@@ -3,35 +3,53 @@ import BookItemCard from '../BookItemCard/BookItemCard';
 import { useLibraryContext } from '../../context-api/BaseContextApi';
 import { BookType } from '../../types/types';
 import axios from 'axios'
+import { getCookie } from '../../utils/cookies';
+
+type UserDataType = {
+    slug: string;
+    currentPage: number;
+}
+
+type TopBookType = {
+    progress: number;
+    title: string;
+    slug: string
+}
 
 const Library = () => {
     const [bookData, setBookData] = useState<BookType[]>([]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get('http://localhost:4000/books');
-                setBookData(response.data);
-            } catch (error: any) {
-                console.error(`Error fetching data: ${error.message}`);
-            }
-        };
+    const userCookie = getCookie('user');
+    const cookieUserData = userCookie ? JSON.parse(userCookie) : {};
+    const { username = '', id = null } = cookieUserData;
 
-        fetchData();
-    }, []);
     const { library } = useLibraryContext();
     const [topRatedBooks, setTopRatedBooks] = useState([]);
 
     useEffect(() => {
-        const sortedBooks = bookData
-            .map((book: BookType) => {
-                const progress = (book.currentPage / book.pageCount) * 100;
-                return { ...book, progress };
-            })
-            .sort((a, b) => b.progress - a.progress);
-        const top5Books:any = sortedBooks.slice(0, 5);
+        const fetchMultipleData = async () => {
+            try {
+                const [fetchBookData, fetchUserData] = await Promise.all([
+                    axios.get(`http://localhost:4000/books/`),
+                    axios.get(`http://localhost:4000/user/${id}`)
+                ]);
+                setBookData(fetchBookData.data);
+                
+                const sortedBooks = fetchUserData?.data?.bookProgress?.map((userBook:UserDataType) => {
+                    const matchingBook = fetchBookData?.data?.find((book:BookType) => book.slug === userBook.slug)
+                    if (matchingBook) {
+                        const progress = (userBook.currentPage / matchingBook.pageCount) * 100;
+                        return { ...{ title: matchingBook.title, slug: matchingBook.slug}, progress: Math.round(progress) };
+                    }
+                    return null
+                }).sort((a: TopBookType, b: TopBookType) => b.progress - a.progress)
+                setTopRatedBooks(sortedBooks)
+            } catch (error: any) {
+                console.log(error.message);
+            }
+        };
 
-        setTopRatedBooks(top5Books);
+        fetchMultipleData();
     }, []);
 
     return (
@@ -54,11 +72,11 @@ const Library = () => {
                 </div>
             )}
             <div className='mt-4'>
-                <h3 className="text-xl font-semibold mb-2">Top 5 Most Progressed Books Information</h3>
+                <h3 className="text-xl font-semibold mb-2">{`Top ${topRatedBooks.length} Most Progressed Books Information`}</h3>
                 <ul className="text-sm list-disc pl-4">
-                    {topRatedBooks.map((book: any, index: number) => (
+                    {topRatedBooks?.map((book: any, index: number) => (
                         <li key={index} className="mb-1">
-                            {book.title} - {Math.round(book?.progress)}% progress
+                            {book.title} - {book.progress}% progress
                         </li>
                     ))}
                 </ul>

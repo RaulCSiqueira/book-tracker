@@ -72,7 +72,6 @@ const BookItem = () => {
                     author: author,
                     review: review,
                 };
-
                 setBook((prevBook) => ({
                     ...prevBook!,
                     reviews: [...(prevBook?.reviews || []), newReview],
