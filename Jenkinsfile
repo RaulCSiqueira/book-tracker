@@ -1,32 +1,56 @@
 pipeline {
     agent any
-    
-    environment {
-        PATH = "/path/to/your/nodejs/bin:${env.PATH}"
+
+
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the code from Git
                 git 'https://github.com/RaulCSiqueira/book-tracker.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Client Side - Install Dependencies and Start Development Server') {
             steps {
-                // Install Node.js dependencies
+                script {
+                    sh 'npm install'
+                    sh 'npm run start &'
+                    sleep 10 // Wait for the development server to start (adjust as needed)
+                }
+            }
+        }
+
+        stage('Client Side - Build Project') {
+            steps {
+                script {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Server Side - Install Dependencies') {
+            steps {
                 script {
                     sh 'npm install'
                 }
             }
         }
 
-        stage('Run Tests') {
+        stage('Server Side - Start Server') {
             steps {
-                // Run tests using your test framework (e.g., Mocha)
                 script {
-                    sh 'npm test'
+                    sh 'npm run start &'
+                    sleep 10 // Wait for the server to start (adjust as needed)
+                }
+            }
+        }
+
+        stage('Server Side - Start Server with Nodemon (Development)') {
+            steps {
+                script {
+                    sh 'npm run start-dev &'
+                    sleep 10 // Wait for the server to start (adjust as needed)
                 }
             }
         }
@@ -34,18 +58,19 @@ pipeline {
 
     post {
         always {
-            // Archive test reports or any artifacts
-            archiveArtifacts 'test-reports/**/*'
+            script {
+                sh 'pkill -f "npm run start"'
+                sh 'pkill -f "npm run start-dev"'
+            }
+            // Clean up processes when the pipeline finishes
         }
 
         success {
-            // Send a notification or trigger additional steps on success
-            echo 'Tests passed successfully!'
+            echo 'Pipeline succeeded!'
         }
 
         failure {
-            // Send a notification or trigger additional steps on failure
-            echo 'Tests failed! Check the test reports.'
+            echo 'Pipeline failed!'
         }
     }
 }
