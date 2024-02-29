@@ -10,6 +10,8 @@ pipeline {
         stage('Install dependencies') {
             steps {
                 sh 'npm install'  // Installs dependencies from package.json
+                sh 'npm run star'
+                
             }
         }
 
