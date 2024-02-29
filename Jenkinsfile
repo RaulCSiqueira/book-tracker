@@ -11,6 +11,7 @@ pipeline {
             steps {
                 sh 'npm install'  // Installs dependencies from package.json
                 sh 'npm run start'
+                sh 'npm run build'
                 
             }
         }
