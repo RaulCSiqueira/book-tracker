@@ -1,76 +1,24 @@
 pipeline {
-    agent any
+    agent any  // Uses any available agent
 
-
+    tools {
+        // Explicitly defines Node.js version (replace "16.19.0" with desired version)
+        nodejs "node"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Install dependencies') {
             steps {
-                git 'https://github.com/RaulCSiqueira/book-tracker.git'
+                sh 'npm install'  // Installs dependencies from package.json
             }
         }
 
-        stage('Client Side - Install Dependencies and Start Development Server') {
+        // Add additional stages for your specific workflow (e.g., build, test, deploy)
+        // Replace "Example" with meaningful stage names and relevant steps within each stage.
+        stage('Example') {
             steps {
-                script {
-                    sh 'npm install'
-                    sh 'npm run start &'
-                    sleep 10 // Wait for the development server to start (adjust as needed)
-                }
+                sh 'npm config ls'  // Example command (replace with your desired task)
             }
-        }
-
-        stage('Client Side - Build Project') {
-            steps {
-                script {
-                    sh 'npm run build'
-                }
-            }
-        }
-
-        stage('Server Side - Install Dependencies') {
-            steps {
-                script {
-                    sh 'npm install'
-                }
-            }
-        }
-
-        stage('Server Side - Start Server') {
-            steps {
-                script {
-                    sh 'npm run start &'
-                    sleep 10 // Wait for the server to start (adjust as needed)
-                }
-            }
-        }
-
-        stage('Server Side - Start Server with Nodemon (Development)') {
-            steps {
-                script {
-                    sh 'npm run start-dev &'
-                    sleep 10 // Wait for the server to start (adjust as needed)
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                sh 'pkill -f "npm run start"'
-                sh 'pkill -f "npm run start-dev"'
-            }
-            // Clean up processes when the pipeline finishes
-        }
-
-        success {
-            echo 'Pipeline succeeded!'
-        }
-
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
