@@ -1,27 +1,51 @@
 pipeline {
-  agent any
+    agent any
     
-  stages {
-        
-    stage('Git') {
-      steps {
-        git 'https://github.com/RaulCSiqueira/book-tracker.git'
-      }
+    environment {
+        PATH = "/path/to/your/nodejs/bin:${env.PATH}"
     }
-     
-    stage('Build') {
-      steps {
-        sh 'npm install'
-        sh 'npm run start'
-        sh 'npm run build'
-      }
-    }  
-    
-            
-    stage('Test') {
-      steps {
-        sh 'nodejs --version'
-      }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the code from Git
+                git 'https://github.com/RaulCSiqueira/book-tracker.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                // Install Node.js dependencies
+                script {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                // Run tests using your test framework (e.g., Mocha)
+                script {
+                    sh 'npm test'
+                }
+            }
+        }
     }
-  }
+
+    post {
+        always {
+            // Archive test reports or any artifacts
+            archiveArtifacts 'test-reports/**/*'
+        }
+
+        success {
+            // Send a notification or trigger additional steps on success
+            echo 'Tests passed successfully!'
+        }
+
+        failure {
+            // Send a notification or trigger additional steps on failure
+            echo 'Tests failed! Check the test reports.'
+        }
+    }
 }
