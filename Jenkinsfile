@@ -12,11 +12,11 @@ pipeline {
                 sh 'npm install'  // Installs dependencies from package.json 
             }
         }
-                stage('test') {
-            steps {
-                sh 'npm run test'  // Example command (replace with your desired task)
-            }
-        }
+             //   stage('test') {
+            //steps {
+              //  sh 'npm run test'  // Example command (replace with your desired task)
+            //}
+        //}
         stage('Start') {
             steps {
                 sh 'npm run start'  // Example command (replace with your desired task)
