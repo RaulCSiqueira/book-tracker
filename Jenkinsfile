@@ -15,9 +15,7 @@ environment {
                 sh 'npm install'  // Installs dependencies from package.json
             }
         }
-    stage('sonar-scanner') {
-stages {
-        stage('Build with Gradle') {
+    stage('Build with Gradle') {
             steps {
                 script {
                     // Use environment variable or directly set hostname
@@ -33,4 +31,5 @@ stages {
             }
         }
     }
+    
 }
